@@ -1,5 +1,6 @@
 FROM python:3.10-slim
 
+RUN mkdir -p /appr/src
 COPY ./main.py /app/src
 COPY ./requirements.txt /app/src
 

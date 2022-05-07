@@ -9,15 +9,6 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    - uses: actions/setup-python@v3
-      with:
-        python-version: ${{ matrix.python-version }}
-    - name: Install Python dependencies
-      uses: py-actions/py-dependency-install@v3
-      with:
-        path: "requirements.txt"
-    - run: python main.py
-
     - name: Build the Docker image
       run: |
         echo $CR_PAT | docker login ghcr.io -u YourAccountOrGHOrgaNameHere --password-stdin
@@ -26,25 +17,3 @@ jobs:
     - name: Get the version
       id: vars
       run: echo ::set-output name=tag::$(date +%s)
-
-    - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag stop-food-waste-recipe:latest
-    - name: Tag the Docker image
-      run: docker tag stop-food-waste-recipe:latest ghcr.io/dominikludwig1995/stop-food-waste-recipe:${{steps.vars.outputs.tag}}
-    - name: Tag the latest Docker image
-      run: docker tag stop-food-waste-recipe:latest ghcr.io/dominikludwig1995/stop-food-waste-recipe:latest
-    - name: Push the tagged Docker image
-      run: docker push ghcr.io/dominikludwig1995/stop-food-waste-recipe:${{steps.vars.outputs.tag}}
-    - name: Push the latest Docker image
-      run: docker push ghcr.io/dominikludwig1995/stop-food-waste-recipe:latest
-
-    - name: Login to DockerHub Registry
-      run: echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
-    - name: Tag the Docker image
-      run: docker tag stop-food-waste-recipe:latest ${{ secrets.DOCKERHUB_USERNAME }}/stop-food-waste-recipe:${{steps.vars.outputs.tag}}
-    - name: Tag the latest Docker image
-      run: docker tag stop-food-waste-recipe:latest ${{ secrets.DOCKERHUB_USERNAME }}/stop-food-waste-recipe:latest
-    - name: Push the tagged Docker image
-      run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/stop-food-waste-recipe:${{steps.vars.outputs.tag}}
-    - name: Push the latest Docker image
-      run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/stop-food-waste-recipe:latest

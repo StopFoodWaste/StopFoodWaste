@@ -1,0 +1,20 @@
+version: "3.9"
+services:
+  backed:
+    name: Backend
+    image: "211019955/stop-food-waste-backend:latest"
+    ports:
+      - 127.0.0.1:8080:8080
+  recipe:
+    name: Recipe
+    image: "211019955/stop-food-waste-recipe:latest"
+    ports:
+      - 127.0.0.1:9090:9090
+  model:
+    name: Model
+    image: "211019955/stop-food-waste-model-api:latest"
+    ports:
+      - 127.0.0.1:7070:7070 
+
+
+

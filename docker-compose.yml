@@ -1,20 +1,62 @@
 version: "3.9"
 services:
   backed:
+    image: 211019955/stop-food-waste-backend:latest
     container_name: Backend
-    image: "211019955/stop-food-waste-backend:latest"
+    restart: on-failure
     ports:
-      - 127.0.0.1:8080:8080
+      - 8080:8080
+    networks:
+      - backend
+    healthcheck:
+      test: "curl -sS http://localhost:8080/health"
+      interval: 1s
+      timeout: 60s
+      retries: 120
+
   recipe:
+    image: 211019955/stop-food-waste-recipe:latest
     container_name: Recipe
-    image: "211019955/stop-food-waste-recipe:latest"
+    restart: on-failure
     ports:
-      - "9090:9090"
+      - "8080:9090"
+    networks:
+      - backend
+    healthcheck:
+      test: "curl -sS http://localhost:9090/health"
+      interval: 1s
+      timeout: 60s
+      retries: 120
+
   model:
+    image: 211019955/stop-food-waste-model-api:latest
     container_name: Model
-    image: "211019955/stop-food-waste-model-api:latest"
+    restart: on-failure
     ports:
-      - "7070:7070"
+      - "8080:7070"
+    networks:
+      - backend
+    healthcheck:
+      test: "curl -sS http://localhost:7070/health"
+      interval: 1s
+      timeout: 60s
+      retries: 120
+
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    restart: on-failure
+    ports:
+      - "80:80"
+    networks:
+      - frontend
+      - backend
+    healthcheck:
+      test: "curl -sS http://localhost:80/health"
+      interval: 1s
+      timeout: 60s
+      retries: 120
+
   influxdb:
     image: influxdb:latest
     container_name: influxdb
@@ -69,5 +111,28 @@ services:
     volumes:
       - grafana_data:/var/lib/grafana
 
+  db:
+    image: postgres:14.1-alpine
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    networks:
+      - backend
+    ports:
+      - "5432:5432"
+    volumes: 
+      - db:/var/lib/postgresql/data
 
 
+volumes:
+  db:
+    driver: local
+
+networks:
+  backend:
+    external: false
+  frontend:
+    external: true
+  monitoring:
+    external: false

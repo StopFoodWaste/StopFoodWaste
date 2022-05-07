@@ -1,0 +1,527 @@
+openapi: 3.0.1
+info:
+  title: SFW 
+  termsOfService: http://sfw.io/terms/
+  contact:
+    email: api@sfw.io
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.0
+
+servers:
+- url: https://model.sfw.io/v1
+- url: https://backend.sfw.io/v1
+- url: https://app.sfw.io/v1
+- url: https://recipe.sfw.io/v1
+
+tags:
+- name: model
+- name: backend
+- name: app
+- name: recipe
+
+paths:
+
+#####################
+#       Model       #
+#####################
+  /model/health:
+    get:
+      tags:
+      - model
+      summary: Health of the model container
+      responses:
+        200:
+          description: successful operation
+          content: 
+            application/json:
+              schema:
+                type: string
+                
+  /model/metrics:
+    get:
+      tags:
+      - model
+      summary: Metrics of the model container
+      responses:
+        200:
+          description: successful operation 
+          content: 
+            application/json:
+              schema:
+                type: string
+  
+  /model/logs:
+    get:
+      tags:
+      - model
+      summary: Logs of the model container
+      responses:
+        200:
+          description: successful operation 
+          content: 
+            application/json:
+              schema:
+                type: string
+                
+  /model/detect/objects-in-image:
+    post:
+      tags:
+      - model
+      summary: Predict objects in image by using a AI Model
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                fileName:
+                  type: string
+                debug:
+                  type: boolean
+                  default: false
+      responses:
+        400:
+          description: Invalid image supplied
+          content: {}
+      security:
+      - sfw_auth:
+        - write:model
+        - read:model
+ 
+  /model/learn/objects-in-image:
+    post:
+      tags:
+      - model
+      summary: Learn objects in image by using a AI Model
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                fileName:
+                  type: string
+                labels:
+                  type: object
+      responses:
+        400:
+          description: Invalid image supplied
+          content: {}
+      security:
+      - sfw_auth:
+        - write:model
+
+  /model/learn/status:
+    get:
+      tags:
+      - model
+      summary: Status of the current learning 
+      responses:
+          200:
+            description: successful operation 
+            content: 
+              application/json:
+                schema:
+                  type: string
+      security:
+      - sfw_auth:
+        - write:model
+   
+  /model/learn/stop:
+    post:
+      tags:
+      - model
+      summary: Stop of the current learning 
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                learnid:
+                  type: string
+      responses:
+          200:
+            description: successful operation 
+            content: 
+              application/json:
+                schema:
+                  type: string
+      security:
+      - sfw_auth:
+        - write:model  
+ 
+  /model/learn/start:
+    post:
+      tags:
+      - model
+      summary: Start of the current learning 
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                learnid:
+                  type: string
+                train_path:
+                  type: string
+                validation_path:
+                  type: string                  
+      responses:
+          200:
+            description: successful operation 
+            content: 
+              application/json:
+                schema:
+                  type: string
+      security:
+      - sfw_auth:
+        - write:model  
+        
+  /model/versions:
+    get:
+      tags:
+      - model
+      summary: List all deployed version of the model
+      responses:
+        200:
+          description: successful operation 
+          content: 
+            application/json:
+              schema:
+                type: string
+      security:
+      - sfw_auth:
+        - read:model
+        
+  /model/version:
+    get:
+      tags:
+      - model
+      summary: Deployed version of the model
+      responses:
+        200:
+          description: successful operation 
+          content: 
+            application/json:
+              schema:
+                type: string
+    post:
+      tags:
+      - model
+      summary: Upload a new version of the model
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                fileName:
+                  type: string
+                  format: binary      
+      responses:
+        200:
+          description: successful operation 
+          content: 
+            application/json:
+              schema:
+                type: string
+      security:
+      - sfw_auth:
+        - write:model
+        
+    put:
+      tags:
+      - model
+      summary: Set a prevoius deployed version of a model
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                version:
+                  type: string
+      responses:
+        200:
+          description: successful operation 
+          content: 
+            application/json:
+              schema:
+                type: string
+      security:
+      - sfw_auth:
+        - write:model
+        
+    delete:
+      tags:
+      - model
+      summary: Deleta a deployed version of a model
+      responses:
+        200:
+          description: successful operation 
+          content: 
+            application/json:
+              schema:
+                type: string      
+      security:
+      - sfw_auth:
+        - write:model
+        
+        
+        
+        
+#####################
+#       Backend     #
+#####################        
+  /backend/health:
+    get:
+      tags:
+      - backend
+      summary: Health of the backend container
+      responses:
+        200:
+          description: Healthy backend container
+          content: {}      
+          
+  /backend/metrics:
+    get:
+      tags:
+      - backend
+      summary: Metrics of the backend container
+      responses:
+        200:
+          description: successful operation 
+          content: 
+            application/json:
+              schema:
+                type: string
+  
+  /backend/logs:
+    get:
+      tags:
+      - backend
+      summary: Logs of the backend container
+      responses:
+        200:
+          description: successful operation 
+          content: 
+            application/json:
+              schema:
+                type: string    
+                
+                
+  /backend/predict/recipes:              
+    post:
+      tags:
+      - backend
+      summary: Predict recipes
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                ingredients:
+                  type: array
+                  items:
+                    type: string
+                category:
+                  type: string
+                  enum: ["Vegetarian", "Vegan", "Others"]
+                meal:
+                  type: string
+                  enum: ["Breakfast","Lunch","Dinner","Snack"]
+      responses:
+        200:
+          description: successful operation 
+          content: 
+            application/json:
+              schema: 
+                type: array
+                items: 
+                  allOf:
+                    - $ref: "#/definitions/Recipe"
+                
+      security:
+      - sfw_auth:
+        - write:backend
+                
+
+          
+#####################
+#       Recipe      #
+#####################         
+  /recipe/health:
+    get:
+      tags:
+      - recipe
+      summary: Health of the recipe container
+      responses:
+        200:
+          description: Healthy recipe container
+          content: {}      
+          
+  /recipe/metrics:
+    get:
+      tags:
+      - recipe
+      summary: Metrics of the recipe container
+      responses:
+        200:
+          description: successful operation 
+          content: 
+            application/json:
+              schema:
+                type: string
+  
+  /recipe/logs:
+    get:
+      tags:
+      - recipe
+      summary: Logs of the recipe container
+      responses:
+        200:
+          description: successful operation 
+          content: 
+            application/json:
+              schema:
+                type: string                 
+                
+                
+  /recipe/from_ingredients:
+    post:
+      tags:
+      - recipe
+      summary: Recipe from Ingredient list
+      requestBody:
+        content:
+          multipart/json:
+            schema:
+              type: object
+              properties:
+                ingredients:
+                  type: array
+                  items:
+                    type: string
+                category:
+                  type: string
+                  enum: ["Vegetarian", "Vegan", "Others"]
+                meal:
+                  type: string
+                  enum: ["Breakfast","Lunch","Dinner","Snack"]
+      responses:
+        200:
+          description: Healthy backend container
+          content: {}
+
+                
+  
+#####################
+#       App     #
+#####################         
+  /app/health:
+    get:
+      tags:
+      - app
+      summary: Health of the backend container
+      responses:
+        200:
+          description: Healthy backend container
+          content: {}      
+          
+  /app/metrics:
+    get:
+      tags:
+      - app
+      summary: Metrics of the app container
+      responses:
+        200:
+          description: successful operation 
+          content: 
+            application/json:
+              schema:
+                type: string
+  
+  /app/logs:
+    get:
+      tags:
+      - app
+      summary: Logs of the app container
+      responses:
+        200:
+          description: successful operation 
+          content: 
+            application/json:
+              schema:
+                type: string       
+ 
+components:
+  securitySchemes:
+    sfw_auth:
+      type: oauth2
+      flows:
+        implicit:
+          authorizationUrl: http://auth.sfw.io/oauth/dialog
+          scopes:
+            write:model: modify model prediction
+            read:model: apply model prediction
+            write:backend: modify backend resources
+            read:backend: apply backend ressources
+            write:app: modify app resources
+            read:app: apply app ressources
+            write:recipe: modify recipe resources
+            read:recipe: apply recipe ressources
+            
+            
+definitions:
+
+  Ingredient:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+      name:
+        type: "string"
+      amount:
+        type: "integer"
+      optional:
+        type: "boolean"
+  Step:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+      name:
+        type: "string"
+      description:
+        type: "string"
+      ingredients:
+        type: "array"
+        items: 
+          $ref: "#/definitions/Ingredient"    
+  Recipe:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+      name:
+        type: "string"
+      description:
+        type: "string"
+      image_url:
+        type: "string"
+      category:
+        type: "string"
+        enum:
+        - "Vegetarian"
+        - "Vegan"
+        - "Others"
+      steps:
+        type: "array"
+        items: 
+          $ref: "#/definitions/Step"          
+    

@@ -1,20 +1,73 @@
 version: "3.9"
 services:
   backed:
-    name: Backend
+    container_name: Backend
     image: "211019955/stop-food-waste-backend:latest"
     ports:
       - 127.0.0.1:8080:8080
   recipe:
-    name: Recipe
+    container_name: Recipe
     image: "211019955/stop-food-waste-recipe:latest"
     ports:
-      - 127.0.0.1:9090:9090
+      - "9090:9090"
   model:
-    name: Model
+    container_name: Model
     image: "211019955/stop-food-waste-model-api:latest"
     ports:
-      - 127.0.0.1:7070:7070 
+      - "7070:7070"
+  influxdb:
+    image: influxdb:latest
+    container_name: influxdb
+    restart: on-failure
+    ports:
+      - 8083:8083
+      - 8086:8086
+      - 8090:8090
+    volumes:
+      - influx_data:/var/lib/influxdb
+    networks:
+      - monitoring
+      - glue
+
+  telegraf:
+    image: telegraf:latest
+    container_name: telegraf
+    restart: on-failure
+    networks:
+      - monitoring
+    volumes:
+      - ./telegraf/telegraf.conf:/etc/telegraf/telegraf.conf:ro
+
+  kapacitor:
+    image: kapacitor:latest
+    container_name: kapacitor
+    volumes:
+      - ./kapacitor/kapacitor.conf:/etc/kapacitor/kapacitor.conf
+    networks:
+      - monitoring
+    ports:
+      - "9092:9092"
+
+  chronograf:
+    image: chronograf:latest
+    container_name: chronograf
+    volumes:
+      - ./chronograf/:/var/lib/chronograf
+    networks:
+      - monitoring
+    ports:
+      - "8888:8888"
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    restart: on-failure
+    ports:
+      - "3030:3030"
+    networks:
+      - monitoring
+    volumes:
+      - grafana_data:/var/lib/grafana
 
 
 

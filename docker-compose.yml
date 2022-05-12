@@ -53,7 +53,7 @@ services:
       - frontend
       - backend
     volumes:
-      - ./nginx/sfw.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/sfw.conf:/etc/nginx/sites-available/nginx.conf:ro
     healthcheck:
       test: "curl -sS http://localhost:80/health"
       interval: 1s
@@ -136,30 +136,13 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      - ./portainer-data:/data
+      - ./portainer_data:/data
     ports:
       - 9000:9000
     networks:
       - monitoring
       - backend
       - frontend
-
-  jenkins:
-    image: jenkins/jenkins:latest
-    privileged: true
-    user: root
-    ports:
-      - 6060:8080
-      - 50000:50000
-    container_name: jenkins
-    volumes:
-    - ./jenkins_data:/var/jenkins_home
-    - /var/run/docker.sock:/var/run/docker.sock
-    networks:
-      - monitoring
-      - backend
-      - frontend
-
 
 networks:
   backend:
@@ -173,6 +156,5 @@ volumes:
   influx_data:
   grafana_data:
   vault_data:
-  portainer-data:
-  jenkins_data:
+  portainer_data:
 

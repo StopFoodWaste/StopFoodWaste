@@ -43,23 +43,6 @@ services:
       timeout: 60s
       retries: 120
 
-  nginx:
-    image: nginx:latest
-    container_name: nginx
-    restart: on-failure
-    ports:
-      - 80:80
-    networks:
-      - frontend
-      - backend
-    volumes:
-      - ./nginx/sfw.conf:/etc/nginx/sites-available/nginx.conf:ro
-    healthcheck:
-      test: "curl -sS http://localhost:80/health"
-      interval: 1s
-      timeout: 60s
-      retries: 120
-
   influxdb:
     image: influxdb:latest
     container_name: influxdb

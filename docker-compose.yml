@@ -20,7 +20,7 @@ services:
     container_name: sfw-recipe
     restart: on-failure
     ports:
-      - "8080:9090"
+      - 9090:8080
     networks:
       - backend
     healthcheck:
@@ -34,7 +34,7 @@ services:
     container_name: sfw-model-api
     restart: on-failure
     ports:
-      - 8080:7070
+      - 7070:8080
     networks:
       - backend
     healthcheck:
@@ -103,7 +103,7 @@ services:
     container_name: grafana
     restart: on-failure
     ports:
-      - "3030:3030"
+      - 3030:3030
     networks:
       - monitoring
     volumes:
@@ -127,6 +127,19 @@ services:
     volumes:
       - vault_data:/vault/file
 
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: portainer
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./portainer-data:/data
+    ports:
+      - 9000:9000
+
 networks:
   backend:
     external: false
@@ -139,7 +152,5 @@ volumes:
   influx_data:
   grafana_data:
   vault_data:
+  portainer-data:
 
-secrets:
-    db_password:
-      file: ./db_password.txt

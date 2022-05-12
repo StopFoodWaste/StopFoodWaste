@@ -1,8 +1,9 @@
 version: "3.9"
+
 services:
-  backed:
+  sfw-backed:
     image: 211019955/stop-food-waste-backend:latest
-    container_name: Backend
+    container_name: sfw-backend
     restart: on-failure
     ports:
       - 8080:8080
@@ -14,9 +15,9 @@ services:
       timeout: 60s
       retries: 120
 
-  recipe:
+  sfw-recipe:
     image: 211019955/stop-food-waste-recipe:latest
-    container_name: Recipe
+    container_name: sfw-recipe
     restart: on-failure
     ports:
       - "8080:9090"
@@ -28,12 +29,12 @@ services:
       timeout: 60s
       retries: 120
 
-  model:
+  sfw-model-api:
     image: 211019955/stop-food-waste-model-api:latest
-    container_name: Model
+    container_name: sfw-model-api
     restart: on-failure
     ports:
-      - "8080:7070"
+      - 8080:7070
     networks:
       - backend
     healthcheck:
@@ -47,10 +48,12 @@ services:
     container_name: nginx
     restart: on-failure
     ports:
-      - "80:80"
+      - 80:80
     networks:
       - frontend
       - backend
+    volumes:
+      - ./nginx/sfw.conf:/etc/nginx/conf.d:ro
     healthcheck:
       test: "curl -sS http://localhost:80/health"
       interval: 1s
@@ -67,9 +70,13 @@ services:
       - 8090:8090
     volumes:
       - influx_data:/var/lib/influxdb
+      - ./influxdb/influxdb.conf:/etc/influxdb/influxdb.conf:ro
+      - ./influxdb/init:/docker-entrypoint-initdb.d
+    environment:
+      - INFLUXDB_ADMIN_USER=${INFLUXDB_USERNAME}
+      - INFLUXDB_ADMIN_PASSWORD=${INFLUXDB_PASSWORD}
     networks:
       - monitoring
-      - glue
 
   telegraf:
     image: telegraf:latest
@@ -83,22 +90,13 @@ services:
   kapacitor:
     image: kapacitor:latest
     container_name: kapacitor
+    restart: on-failure
     volumes:
-      - ./kapacitor/kapacitor.conf:/etc/kapacitor/kapacitor.conf
+      - ./kapacitor/kapacitor.conf:/etc/kapacitor/kapacitor.conf:ro
     networks:
       - monitoring
     ports:
-      - "9092:9092"
-
-  chronograf:
-    image: chronograf:latest
-    container_name: chronograf
-    volumes:
-      - ./chronograf/:/var/lib/chronograf
-    networks:
-      - monitoring
-    ports:
-      - "8888:8888"
+      - 9092:9092
 
   grafana:
     image: grafana/grafana:latest
@@ -109,25 +107,16 @@ services:
     networks:
       - monitoring
     volumes:
+      - ./grafana/provisioning/datasources/all.yml:/etc/grafana/provisioning/datasources:ro
+      - ./grafana/provisioning/dashboards/all.yml:/var/lib/grafana/dashboards:ro
       - grafana_data:/var/lib/grafana
-
-  db:
-    image: postgres:14.2-alpine
-    restart: always
-    environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-    networks:
-      - backend
-    ports:
-      - "5432:5432"
-    volumes: 
-      - db:/var/lib/postgresql/data
 
   vault-server:
     image: vault:latest
+    container_name: vault
+    restart: on-failure
     ports:
-      - "8200:8200"
+      - 8200:8200
     environment:
       VAULT_ADDR: "http://0.0.0.0:8200"
       VAULT_DEV_ROOT_TOKEN_ID: "vault-plaintext-root-token"
@@ -135,26 +124,8 @@ services:
       - IPC_LOCK
     networks:
       - backend
-
-  keycloak:
-      image: quay.io/keycloak/keycloak:legacy
-      environment:
-        DB_VENDOR: POSTGRES
-        DB_ADDR: postgres
-        DB_DATABASE: keycloak
-        DB_USER: keycloak
-        DB_SCHEMA: public
-        DB_PASSWORD: password
-        KEYCLOAK_USER: admin
-        KEYCLOAK_PASSWORD: Pa55w0rd
-      ports:
-        - "8080:8080"
-      depends_on:
-        - postgres
-
-volumes:
-  db:
-    driver: local
+    volumes:
+      - vault_data:/vault/file
 
 networks:
   backend:
@@ -163,3 +134,12 @@ networks:
     external: true
   monitoring:
     external: false
+
+volumes:
+  influx_data:
+  grafana_data:
+  vault_data:
+
+secrets:
+    db_password:
+      file: ./db_password.txt

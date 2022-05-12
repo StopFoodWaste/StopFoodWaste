@@ -15,4 +15,4 @@ jobs:
       env:
         CR_PAT: ${{ secrets.CR_PAT }}
     - name: Check docker-compose
-      run: docker-compose up
+      run: docker-compose config

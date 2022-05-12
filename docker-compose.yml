@@ -131,7 +131,7 @@ networks:
   backend:
     external: false
   frontend:
-    external: true
+    external: false
   monitoring:
     external: false
 

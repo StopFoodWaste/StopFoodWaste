@@ -475,8 +475,7 @@ components:
             read:app: apply app ressources
             write:recipe: modify recipe resources
             read:recipe: apply recipe ressources
-            
-            
+
 definitions:
   Ingredient:
     type: "object"

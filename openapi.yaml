@@ -478,7 +478,6 @@ components:
             
             
 definitions:
-
   Ingredient:
     type: "object"
     properties:

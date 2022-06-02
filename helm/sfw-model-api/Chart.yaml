@@ -1,5 +1,0 @@
-apiVersion: v2
-name: sfw-model-api
-description: sfw-model-api
-type: application
-version: 1.0.0

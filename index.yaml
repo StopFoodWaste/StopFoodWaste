@@ -1,0 +1,14 @@
+apiVersion: v1
+entries:
+  helm-chart-test:
+  - apiVersion: v2
+    appVersion: 1.16.0
+    created: "2022-06-05T10:09:11.995998+02:00"
+    description: A Helm chart for Kubernetes
+    digest: 485180c0577ca3238e8602bbc080e2f63b840118deaa322bafaa47cb1083faed
+    name: helm-chart-test
+    type: application
+    urls:
+    - https://dominikludwig1995.github.io/StopFoodWaste/helm-chart-test-0.1.0.tgz
+    version: 0.1.0
+generated: "2022-06-05T10:09:11.991735+02:00"

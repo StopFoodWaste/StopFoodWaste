@@ -4,5 +4,7 @@
 ## Run
 
 ```
-docker-compose -f app.yml up -d 
+helm repo add myhelmrepo https://dominikludwig1995.github.io/StopFoodWaste/
+helm update
+helm search repo sfw-recipe
 ```

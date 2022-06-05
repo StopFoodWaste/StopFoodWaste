@@ -1,6 +1,6 @@
 helm_package:
 	helm package helm-chart-sources/*
-	helm repo index --url https://dominikludwig1995.github.io/StopFoodWaste/  .
+	helm repo index --url https://dominikludwig1995.github.io/StopFoodWaste/  --merge index.yaml .
 
 helm_lint:
 	helm lint helm-chart-sources/*

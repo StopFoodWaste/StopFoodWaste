@@ -1,0 +1,72 @@
+nginx:
+  image:
+    repository: nginx
+    tag: stable
+
+image:
+  # image config
+  repository: 211019955/stop-food-waste-recipe
+  tag: latest
+  pullPolicy: Always
+  imagePullSecrets: []
+  nameOverride: ""
+  fullnameOverride: ""
+
+configmap:
+  # django environment
+  data:
+    #DJANGO_SETTINGS_MODULE: config.settings.production
+    #DATABASE_URL:
+    SECRET_KEY: 123
+
+pvc:
+  created: false
+  storageClassName:
+
+serviceAccount:
+  created: false
+  annotations: {}
+  name:
+
+sfwRecipe:
+  replicaCount: 3
+  podSecurityContext: {}
+  securityContext: {}
+
+  # Accessing Service different NS sfw-recipe.sfw.svc.cluster.local
+  service:
+    type: NodePort
+    port: 80
+
+  hpa:
+    enabled: false
+
+  ingress:
+    enabled: false
+    annotations: {}
+    #kubernetes.io/ingress.class: nginx
+
+    hosts:
+      - host: chart-example.local
+        paths: ["/"]
+    tls: []
+
+  resources:
+    limits:
+      cpu: 200m
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+  nodeSelector: {}
+
+  tolerations: []
+
+  affinity: {}
+
+collectstaticJob:
+  enabled: false
+
+migrateJob:
+  enabled: false

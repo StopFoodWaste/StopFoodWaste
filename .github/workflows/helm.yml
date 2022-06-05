@@ -1,0 +1,32 @@
+name: Helm
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+defaults:
+  run:
+    working-directory: ./helm
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Install Helm
+      run: | 
+        curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+        chmod 700 get_helm.sh
+        ./get_helm.sh
+
+    - name: Package Helm Chart
+      run: make helm_package
+
+    - name: Lint
+      run: make helm_lint
+
+    - name: Dry-Run
+      run: make helm_validate

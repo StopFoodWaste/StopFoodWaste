@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "django-helm.name" . }}-conf
+  namespace: sfw
+data:
+  sfwRecipe.conf: |
+    upstream app_server {
+      server 127.0.0.1:8000  fail_timeout=0;
+    }
+
+    server {  
+      listen 80;
+      
+      location / {
+      proxy_pass http://app_server;
+      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+      proxy_set_header Host $host;
+      proxy_redirect off;
+      }
+    }

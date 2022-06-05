@@ -1,0 +1,99 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{.Release.Name}}
+  labels:
+    {{- include "django-helm.labels" . | nindent 4 }}
+    app.kubernetes.io/component: sfw-recipe
+spec:
+  replicas: {{ .Values.sfwRecipe.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "django-helm.labels" . | nindent 6 }}
+      app.kubernetes.io/component: sfw-recipe
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        {{- include "django-helm.labels" . | nindent 8 }}
+        app.kubernetes.io/component: sfw-recipe
+      annotations:
+        checksum/config: {{include (print $.Template.BasePath "/django-core/configmap.yaml") . | sha256sum }}
+    spec:
+      volumes:
+        - name: nginx-conf
+          configMap:
+            name: {{ include "django-helm.name" . }}-conf
+        - name: static
+          emptyDir: {}
+    {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      initContainers:
+        - name: {{ .Chart.Name }}-collectstatic
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["python", "manage.py", "collectstatic", "--noinput"]
+          volumeMounts:
+            - name: static
+              mountPath: /code/static
+      securityContext:
+        {{- toYaml .Values.sfwRecipe.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}-nginx
+          image: "{{ .Values.nginx.image.repository }}:{{ .Values.nginx.image.tag }}"
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - name: nginx-conf
+              mountPath: /etc/nginx/conf.d/
+            - name: static
+              mountPath: /var/www/static
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /recipe/health
+              port: http
+            initialDelaySeconds: 20
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /recipe/health
+              port: http
+            failureThreshold: 1
+            periodSeconds: 10
+          {{- with .Values.sfwRecipe.command }}
+          {{- end }}
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.sfwRecipe.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: django
+              containerPort: 8000
+              protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: {{.Release.Name}}-config
+          resources:
+            {{- toYaml .Values.sfwRecipe.resources | nindent 12 }}
+      {{- with .Values.sfwRecipe.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.sfwRecipe.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.sfwRecipe.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

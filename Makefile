@@ -25,6 +25,7 @@ helm_install: helm_package helm_dry_run
 	helm list -A
 
 helm_cleanup:
-	kubectl delete configmap sfw-recipe-conf
-	kubectl delete configmap sfw-recipe-config
+	kubectl get configmap -A
+	kubectl delete configmap sfw-recipe-conf -n sfw
+	kubectl delete configmap sfw-recipe-config -n sfw
 	kubectl get configmap -A

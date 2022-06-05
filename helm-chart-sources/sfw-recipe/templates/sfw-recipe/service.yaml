@@ -7,10 +7,14 @@ metadata:
 spec:
   type: {{ .Values.sfwRecipe.service.type }}
   ports:
-    - port: {{ .Values.sfwRecipe.service.port }}
+    - port: {{ .Values.sfwRecipe.service.port.http }}
       targetPort: django
       protocol: TCP
       name: django
+    - port: {{ .Values.sfwRecipe.service.port.https }}
+      targetPort: djangotls
+      protocol: TCP
+      name: djangotls
   selector:
     {{- include "django-helm.labels" . | nindent 4 }}
     app.kubernetes.io/component: sfw-recipe

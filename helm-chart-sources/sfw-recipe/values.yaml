@@ -35,8 +35,10 @@ sfwRecipe:
 
   # Accessing Service different NS sfw-recipe.sfw.svc.cluster.local
   service:
-    type: NodePort
-    port: 80
+    type: ClusterIP
+    port:
+      http: 80
+      https: 443
 
   hpa:
     enabled: false

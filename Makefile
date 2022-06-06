@@ -8,7 +8,7 @@ helm_lint:
 helm_uninstall:
 	helm uninstall sfw-recipe --namespace sfw
 
-helm_validate:
+helm_validate: helm_package
 	helm template sfw-recipe sfw-recipe-1.0.0.tgz
 
 helm_dry_run:
@@ -26,6 +26,6 @@ helm_install: helm_package helm_dry_run
 
 helm_cleanup:
 	kubectl get configmap -A
-	kubectl delete configmap sfw-recipe-conf -n sfw
+	#kubectl delete configmap sfw-recipe-conf -n sfw
 	kubectl delete configmap sfw-recipe-config -n sfw
 	kubectl get configmap -A

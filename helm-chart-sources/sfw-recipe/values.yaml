@@ -1,8 +1,3 @@
-nginx:
-  image:
-    repository: nginx
-    tag: stable
-
 image:
   # image config
   repository: 211019955/stop-food-waste-recipe
@@ -46,7 +41,6 @@ sfwRecipe:
   ingress:
     enabled: false
     annotations: {}
-    #kubernetes.io/ingress.class: nginx
 
     hosts:
       - host: chart-example.local

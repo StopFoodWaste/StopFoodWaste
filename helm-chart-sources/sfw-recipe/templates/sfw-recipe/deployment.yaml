@@ -25,6 +25,9 @@ spec:
         checksum/config: {{include (print $.Template.BasePath "/django-core/configmap.yaml") . | sha256sum }}
     spec:
       volumes:
+        - name: nginx-conf
+          configMap:
+            name: {{ include "django-helm.name" . }}-conf
         - name: static
           emptyDir: {}
     {{- with .Values.imagePullSecrets }}
@@ -42,6 +45,32 @@ spec:
       securityContext:
         {{- toYaml .Values.sfwRecipe.podSecurityContext | nindent 8 }}
       containers:
+        - name: {{ .Chart.Name }}-nginx
+          image: "{{ .Values.nginx.image.repository }}:{{ .Values.nginx.image.tag }}"
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - name: nginx-conf
+              mountPath: /etc/nginx/conf.d/
+            - name: static
+              mountPath: /var/www/static
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /recipe/health
+              port: http
+            initialDelaySeconds: 20
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /recipe/health
+              port: http
+            failureThreshold: 1
+            periodSeconds: 10
+          {{- with .Values.sfwRecipe.command }}
+          {{- end }}
         - name: {{ .Chart.Name }}
           securityContext:
             {{- toYaml .Values.sfwRecipe.securityContext | nindent 12 }}
@@ -51,18 +80,6 @@ spec:
             - name: django
               containerPort: 8000
               protocol: TCP
-          readinessProbe:
-            httpGet:
-              path: /recipe/health
-              port: django
-            initialDelaySeconds: 20
-            periodSeconds: 10
-          livenessProbe:
-            httpGet:
-              path: /recipe/health
-              port: django
-            failureThreshold: 1
-            periodSeconds: 10
           envFrom:
             - configMapRef:
                 name: {{.Release.Name}}-config

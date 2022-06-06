@@ -2,13 +2,13 @@ apiVersion: v1
 entries:
   sfw-recipe:
   - apiVersion: v2
-    created: "2022-06-06T10:32:16.33809+02:00"
+    created: "2022-06-06T10:36:21.368142+02:00"
     description: A Helm chart for Kubernetes
-    digest: 945375747d89c535a2f0abd90dd99600b7c82bcc9c3e0d49f598051ac518ca05
+    digest: 475bb125c587fc519a7b783f202a1341680122924afa9a07a3465a88325b66bf
     icon: file://./helm-icon.png
     name: sfw-recipe
     type: application
     urls:
     - https://dominikludwig1995.github.io/StopFoodWaste/sfw-recipe-1.0.0.tgz
     version: 1.0.0
-generated: "2022-06-06T10:32:16.33727+02:00"
+generated: "2022-06-06T10:36:21.367434+02:00"
